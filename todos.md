@@ -1,0 +1,3 @@
+- Info popup for start
+- After 10 failed attempts, try step before.
+- Reset/hide counter when input changes 
