@@ -16,11 +16,11 @@ type TradeStep = (typeof TradeStep)[keyof typeof TradeStep];
 export type MachineState = "off" | "running" | "success" | "stopped" | "error";
 
 const BUTTONS: Record<TradeStep, string> = {
-  [TradeStep.START_TRADE]: "/templates/s0.png",
-  [TradeStep.SELECT_MON]: "/templates/s1.png",
-  [TradeStep.CONFIRM_MON]: "/templates/s2.png",
-  [TradeStep.CONFIRM_TRADE]: "/templates/s3.png",
-  [TradeStep.CLOSE]: "/templates/s4.png",
+  [TradeStep.START_TRADE]: "/go-trader/templates/s0.png",
+  [TradeStep.SELECT_MON]: "/go-trader/templates/s1.png",
+  [TradeStep.CONFIRM_MON]: "/go-trader/templates/s2.png",
+  [TradeStep.CONFIRM_TRADE]: "/go-trader/templates/s3.png",
+  [TradeStep.CLOSE]: "/go-trader/templates/s4.png",
 };
 
 const STEPS_IN_ORDER: TradeStep[] = [
@@ -104,7 +104,7 @@ export const useStateMachine = (adb: Adb | null) => {
 
       const expired = await findButtonInScreenshot(
         screenshotUrl,
-        "/templates/expired.png",
+        "/go-trader/templates/expired.png",
       );
       if (expired.score > 0.9) {
         setError(`[Step ${currentStep}] failed. Trade Expired.`);
@@ -113,7 +113,7 @@ export const useStateMachine = (adb: Adb | null) => {
 
       const special = await findButtonInScreenshot(
         screenshotUrl,
-        "/templates/special.png",
+        "/go-trader/templates/special.png",
       );
       if (special.score > 0.9) {
         setError(`[Step ${currentStep}] failed. Special Trade detected.`);
