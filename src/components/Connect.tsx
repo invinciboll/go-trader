@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Flex, Modal, Steps, Typography } from "antd";
+import { Button, Modal, Steps, Typography } from "antd";
 import {
   AdbDaemonWebUsbConnection,
   AdbDaemonWebUsbDevice,
@@ -129,7 +129,6 @@ const ConnectSteps: React.FC<ConnectStepsProps> = ({ setAdb, adb }) => {
         current={progress}
         items={items}
         status={status}
-        // style={{ paddingLeft: 50, paddingRight: 50 }}
       />
     </>
   );

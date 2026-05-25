@@ -44,11 +44,11 @@ const TradeProgress: React.FC<{ step: number; currentState: MachineState }> = ({
   currentState,
 }) => {
   const items = [
-    "Start Trade",
-    "Select Mon",
-    "Confirm Mon",
-    "Confirm Trade",
-    "Close",
+    "Starting Trade",
+    "Selecting Mon",
+    "Confirming Mon",
+    "Confirming Trade",
+    "Closing",
   ].map((content, index) => ({
     content,
     icon: deriveIcon(index, step, currentState),
