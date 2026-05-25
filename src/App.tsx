@@ -1,6 +1,5 @@
 import { Flex, Layout, Typography } from "antd";
 import { Header, Content, Footer } from "antd/es/layout/layout";
-import Connect from "./components/Connect";
 import TradingWindow from "./components/TradingWindow";
 
 function App() {

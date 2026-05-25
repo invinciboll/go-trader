@@ -1,5 +1,5 @@
-import { Typography } from "antd";
+// import { Typography } from "antd";
 
-const info = () => {
-  return <Typography.Paragraph></Typography.Paragraph>;
-};
+// const info = () => {
+//   return <Typography.Paragraph></Typography.Paragraph>;
+// };

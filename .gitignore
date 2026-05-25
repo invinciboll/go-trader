@@ -1,0 +1,19 @@
+# dependencies
+node_modules
+node_modules/*
+node_modules/**/*
+
+# production build
+dist
+
+# logs
+*.log
+
+# environment variables
+.env
+
+# editor files
+.idea
+
+# macOS
+.DS_Store

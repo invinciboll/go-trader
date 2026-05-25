@@ -8,7 +8,7 @@ import {
 import type { StepsProps } from "antd";
 import { Adb, AdbDaemonTransport } from "@yume-chan/adb";
 import AdbWebCredentialStore from "@yume-chan/adb-credential-web";
-import type { DeviceBusyError } from "@yume-chan/adb-daemon-webusb/esm/error";
+// import type { DeviceBusyError } from "@yume-chan/adb-daemon-webusb/esm/error";
 
 interface ConnectStepsProps {
   setAdb: (adb: Adb | null) => void;
@@ -40,9 +40,11 @@ const ConnectSteps: React.FC<ConnectStepsProps> = ({ setAdb, adb }) => {
           setConnection(con);
         }
       } catch (error: unknown) {
-        Modal.error({
-          title: "error",
-        });
+        console.log(error);
+        // Modal.error({
+        //     title: "error"
+        //   }
+        // });
       }
     }
   };

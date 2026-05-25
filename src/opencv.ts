@@ -32,7 +32,7 @@ export async function findButtonInScreenshot(
   const result = new cv.Mat();
   cv.matchTemplate(src, tpl, result, cv.TM_CCOEFF_NORMED);
 
-  const minMax = cv.minMaxLoc(result);
+  const minMax = cv.minMaxLoc(result, null,null,null,null);
   const tplWidth = tpl.cols;
   const tplHeight = tpl.rows;
 
@@ -47,6 +47,7 @@ export async function findButtonInScreenshot(
     height: tplHeight,
   };
 }
+
 export async function drawMatchOnScreenshot(
   screenshotUrl: string,
   match: MatchResult,

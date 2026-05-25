@@ -1,5 +1,5 @@
 import type { Adb } from "@yume-chan/adb";
-import { useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useRef, useState } from "react";
 import { takeScreenshot, tapScreen } from "./adb";
 import { findButtonInScreenshot, drawMatchOnScreenshot } from "./opencv";
 
