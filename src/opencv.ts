@@ -51,6 +51,7 @@ export async function findButtonInScreenshot(
 export async function drawMatchOnScreenshot(
   screenshotUrl: string,
   match: MatchResult,
+  accept: boolean,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -61,8 +62,8 @@ export async function drawMatchOnScreenshot(
       const ctx = canvas.getContext("2d")!;
       ctx.drawImage(img, 0, 0);
 
-      ctx.strokeStyle = "lime";
-      ctx.lineWidth = 6;
+      ctx.strokeStyle = accept ? "lime" : "red";
+      ctx.lineWidth = 12;
       ctx.strokeRect(
         match.location.x,
         match.location.y,
@@ -70,15 +71,15 @@ export async function drawMatchOnScreenshot(
         match.height,
       );
 
-      const label = "best match";
-      const fontSize = 36;
+      const label = accept ? "best match": "no match"; ;
+      const fontSize = 48;
       ctx.font = `bold ${fontSize}px sans-serif`;
       const textWidth = ctx.measureText(label).width;
       const padding = 4;
       const labelX = match.location.x;
       const labelY = match.location.y - 8;
 
-      ctx.fillStyle = "lime";
+      ctx.fillStyle = accept ? "lime" : "red";
       ctx.fillRect(
         labelX,
         labelY - fontSize,
@@ -86,7 +87,7 @@ export async function drawMatchOnScreenshot(
         fontSize + padding,
       );
 
-      ctx.fillStyle = "black";
+      ctx.fillStyle = accept ? "black" : "white";
       ctx.fillText(label, labelX + padding, labelY - 2);
 
       resolve(canvas.toDataURL("image/png"));

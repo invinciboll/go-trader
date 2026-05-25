@@ -87,14 +87,15 @@ export const useStateMachine = (adb: Adb | null) => {
       }
 
       const match = await findButtonInScreenshot(screenshotUrl, templateUrl);
-      const debugUrl = await drawMatchOnScreenshot(screenshotUrl, match);
+      const accept = match.score > MATCH_THRESHOLDS[currentStep];
+      const debugUrl = await drawMatchOnScreenshot(screenshotUrl, match, accept);
       updateScreenshot(debugUrl);
 
       console.log(
         `[Step ${currentStep}] score: ${match.score.toFixed(3)}, threshold: ${MATCH_THRESHOLDS[currentStep]} (attempt ${attempt + 1})`,
       );
 
-      if (match.score > MATCH_THRESHOLDS[currentStep]) {
+      if (accept) {
         const centerX = match.location.x + match.width / 2;
         const centerY = match.location.y + match.height / 2;
         await tapScreen(adb, centerX, centerY);
