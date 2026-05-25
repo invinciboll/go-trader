@@ -7,28 +7,30 @@ import {
   ExclamationCircleOutlined,
   LoadingOutlined,
 } from "@ant-design/icons";
-import type { MachineState } from "../useStateMachine";
+
+import { useTradeMachine } from "../api/statemachine/useTradeMachine";
+import type { TradeMachineState } from "../api/statemachine/constants";
 
 const deriveIcon = (
   index: number,
   step: number,
-  currentState: MachineState,
+  currentState: TradeMachineState,
 ) => {
-  if (currentState === "success") {
+  if (currentState === "SUCCESS") {
     return <CheckCircleTwoTone twoToneColor="#52c41a" />;
   }
 
   if (index === step) {
-    return currentState === "error" ? (
+    return currentState === "ERROR" ? (
       <CloseCircleFilled style={{ color: "red" }} />
-    ) : currentState === "stopped" ? (
+    ) : currentState === "STOPPED" ? (
       <ExclamationCircleOutlined />
     ) : (
       <LoadingOutlined />
     );
   }
   if (index > step) {
-    return currentState === "error" || currentState === "stopped" ? (
+    return currentState === "ERROR" || currentState === "STOPPED" ? (
       <ExclamationCircleOutlined style={{ color: "grey" }} />
     ) : (
       <ClockCircleOutlined />
@@ -39,10 +41,13 @@ const deriveIcon = (
   }
 };
 
-const TradeProgress: React.FC<{ step: number; currentState: MachineState }> = ({
-  step,
-  currentState,
-}) => {
+const TradeProgress: React.FC  = () => {
+  const { currentMachineState, currentTradeStep } = useTradeMachine();
+
+  if (currentMachineState === "OFF") {
+    return null;
+  }
+
   const items = [
     "Starting Trade",
     "Selecting Mon",
@@ -51,7 +56,7 @@ const TradeProgress: React.FC<{ step: number; currentState: MachineState }> = ({
     "Closing",
   ].map((content, index) => ({
     content,
-    icon: deriveIcon(index, step, currentState),
+    icon: deriveIcon(index, currentTradeStep, currentMachineState),
   }));
 
   return <Timeline orientation="vertical" items={items} mode="start" />;

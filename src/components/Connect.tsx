@@ -8,25 +8,24 @@ import {
 import type { StepsProps } from "antd";
 import { Adb, AdbDaemonTransport } from "@yume-chan/adb";
 import AdbWebCredentialStore from "@yume-chan/adb-credential-web";
+import { useAdb } from "../api/adb/useAdb";
 // import type { DeviceBusyError } from "@yume-chan/adb-daemon-webusb/esm/error";
 
-interface ConnectStepsProps {
-  setAdb: (adb: Adb | null) => void;
-  adb: Adb | null;
-}
 
-const ConnectSteps: React.FC<ConnectStepsProps> = ({ setAdb, adb }) => {
+const ConnectSteps: React.FC= () => {
   const Manager = AdbDaemonWebUsbDeviceManager.BROWSER; // undefined if no WebUSB support
   const [device, setDevice] = useState<AdbDaemonWebUsbDevice | undefined>(
     undefined,
   );
   const [connection, setConnection] =
     useState<AdbDaemonWebUsbConnection | null>(null);
+    
+  const { initialize: setAdb, deinitialize: unsetAdb, isReady: adbReady  } = useAdb();
 
-  const progress = !Manager ? 0 : !device || !connection ? 1 : !adb ? 2 : 3;
+  const progress = !Manager ? 0 : !device || !connection ? 1 : !adbReady ? 2 : 3;
   const status: StepsProps["status"] = !Manager
     ? "error"
-    : adb
+    : adbReady
       ? "finish"
       : "wait";
 
@@ -56,7 +55,9 @@ const ConnectSteps: React.FC<ConnectStepsProps> = ({ setAdb, adb }) => {
       content:
         "A connection request should appear on your Android device. Tap 'Allow' to authorize ADB access.",
       footer: null,
-      maskClosable: false,
+      mask: {
+        closable: false
+      },
     });
 
     try {
@@ -75,7 +76,6 @@ const ConnectSteps: React.FC<ConnectStepsProps> = ({ setAdb, adb }) => {
   const items = [
     {
       title: "Browser Compatible",
-      content: "Chromium based browser required.",
     },
     {
       title: device ? `${device.name} selected` : "Select Device",
@@ -86,7 +86,7 @@ const ConnectSteps: React.FC<ConnectStepsProps> = ({ setAdb, adb }) => {
       ),
     },
     {
-      title: adb ? "Authenticated" : "Authenticate Adb",
+      title: adbReady ? "Authenticated" : "Authenticate Adb",
       content: (
         <Button disabled={progress !== 2} onClick={authenticate}>
           Auth
@@ -108,13 +108,12 @@ const ConnectSteps: React.FC<ConnectStepsProps> = ({ setAdb, adb }) => {
           (d) => d.serial === device.serial,
         );
         if (wasOurDevice) {
-          setAdb(null);
+          unsetAdb();
           setConnection(null);
           setDevice(undefined);
         }
       });
     };
-
     setup();
 
     return () => {

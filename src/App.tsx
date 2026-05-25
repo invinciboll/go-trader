@@ -2,6 +2,9 @@ import { Flex, Layout, Typography } from "antd";
 import { Header, Content, Footer } from "antd/es/layout/layout";
 import TradingWindow from "./components/TradingWindow";
 import InfoText from "./components/InfoText";
+import { AdbProvider } from "./api/adb/adbProvider";
+import { OpenCvProvider } from "./api/opencv/openCvProvider";
+import { TradeMachineProvider } from "./api/statemachine/tradeMachineProvider";
 
 
 function App() {
@@ -15,10 +18,16 @@ function App() {
         </Flex>
       </Header>
       <Content style={{ paddingLeft: 250, paddingRight: 250, paddingBottom: 40 }}>
-        <Flex justify="center" vertical>
-          <InfoText />
-          <TradingWindow />
-        </Flex>
+        <AdbProvider>
+          <OpenCvProvider>
+            <TradeMachineProvider>
+              <Flex justify="center" vertical>
+                <InfoText />
+                <TradingWindow />
+              </Flex>
+            </TradeMachineProvider>
+          </OpenCvProvider>
+        </AdbProvider>
       </Content>
       <Footer style={{ backgroundColor: "white" }}></Footer>
     </Layout>

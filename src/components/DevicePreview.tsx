@@ -1,22 +1,19 @@
 import { Flex, Typography } from "antd";
-import type { MachineState } from "../useStateMachine";
+import { useTradeMachine } from "../api/statemachine/useTradeMachine";
 
-const DevicePreview: React.FC<{
-  screenshotUrl: string | null;
-  currentState: MachineState;
-}> = ({ screenshotUrl, currentState }) => {
-  if (!screenshotUrl) return null;
+const DevicePreview: React.FC = () => {
+  const { currentMachineState, currentScreenshotUrl } = useTradeMachine();
+  
+  if (!currentScreenshotUrl) return null;
 
   return (
-    <Flex>
-      <Flex vertical>
-        <Typography.Title level={5}>{currentState}</Typography.Title>
-        <img
-          src={screenshotUrl}
-          alt="device screenshot"
-          style={{ maxWidth: 200, borderRadius: 16 }}
-        />
-      </Flex>
+    <Flex vertical>
+      <Typography.Title level={5}>{currentMachineState.toLowerCase()}</Typography.Title>
+      <img
+        src={currentScreenshotUrl}
+        alt="device screenshot"
+        style={{ maxWidth: 200, borderRadius: 16 }}
+      />
     </Flex>
   );
 };
