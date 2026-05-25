@@ -1,17 +1,22 @@
 import { Flex, Layout, Typography } from "antd";
 import { Header, Content, Footer } from "antd/es/layout/layout";
 import TradingWindow from "./components/TradingWindow";
+import InfoText from "./components/InfoText";
+
 
 function App() {
   return (
     <Layout>
-      <Header style={{ backgroundColor: "white" }}>
-        <Typography.Title level={1} style={{ margin: 0 }}>
-          PoGo Trader
-        </Typography.Title>
+      <Header style={{ paddingLeft: 250, paddingRight: 250, backgroundColor: "white" }}>
+        <Flex align="center">
+          <Typography.Title level={1} style={{ margin: 0 }}>
+            Go Trader
+          </Typography.Title>
+        </Flex>
       </Header>
-      <Content style={{ padding: 100 }}>
-        <Flex justify="center" vertical gap={96}>
+      <Content style={{ paddingLeft: 250, paddingRight: 250, paddingBottom: 40 }}>
+        <Flex justify="center" vertical>
+          <InfoText />
           <TradingWindow />
         </Flex>
       </Content>

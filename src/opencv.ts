@@ -32,7 +32,7 @@ export async function findButtonInScreenshot(
   const result = new cv.Mat();
   cv.matchTemplate(src, tpl, result, cv.TM_CCOEFF_NORMED);
 
-  const minMax = cv.minMaxLoc(result, null,null,null,null);
+  const minMax = (cv as any).minMaxLoc(result); //any cast to avoid ts/wasm mismatch warning
   const tplWidth = tpl.cols;
   const tplHeight = tpl.rows;
 
