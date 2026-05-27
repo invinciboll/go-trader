@@ -35,9 +35,9 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
         Map<TradeStep, cv.Mat>
     >(new Map());
 
-    const initialize = (deviceWidth: number, deviceHeight: number) => {
+    const initialize = (remoteTradeButtonVisible: boolean, deviceWidth: number, deviceHeight: number) => {
         // Only scale if width differs
-        let widthFactor = 1;
+        let widthFactor = 1 ;
         let heightFactor = 1;
 
         if (deviceWidth !== referenceDevice.WIDTH) {
@@ -45,10 +45,11 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
             heightFactor = deviceHeight / referenceDevice.HEIGHT;
         } 
         
-        preloadTemplates(widthFactor, heightFactor);
+        preloadTemplates(remoteTradeButtonVisible, widthFactor, heightFactor);
     }
 
     async function preloadTemplates(
+        remoteTradeButtonVisible: boolean,
         widthFactor: number,
         heightFactor: number
     ) {
@@ -59,16 +60,19 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
 
             const original = await urlToMat(templateUrl);
             const scaled = new cv.Mat();
-
+            
+            let adjustedWidthFactor = remoteTradeButtonVisible && tradeStep === TradeStep.START_TRADE ? widthFactor * 0.8 : widthFactor; 
+            let adjustedHeightFactor = remoteTradeButtonVisible && tradeStep === TradeStep.START_TRADE ? heightFactor * 0.8 : heightFactor; 
+            // console.log(tradeStep, adjustedWidthFactor, adjustedHeightFactor);
             cv.resize(
                 original,
                 scaled,
                 new cv.Size(
                     Math.round(
-                        original.cols * widthFactor
+                        original.cols * adjustedWidthFactor
                     ),
                     Math.round(
-                        original.rows * heightFactor
+                        original.rows * adjustedHeightFactor
                     )
                 ),
                 0,
@@ -112,7 +116,7 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
         cv.matchTemplate(src, tpl, result, cv.TM_CCOEFF_NORMED);
 
         const minMax = (cv as any).minMaxLoc(result);
-        // console.log("[findButton] match score:", minMax.maxVal, "| location:", minMax.maxLoc);
+        console.log("match score:", minMax.maxVal, "| location:", minMax.maxLoc);
 
         src.delete();
         result.delete();

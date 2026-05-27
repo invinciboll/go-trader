@@ -1,8 +1,9 @@
-import { Card, Form, InputNumber, Button, Flex, Progress, Tag, type ProgressProps, Switch, Modal, Typography } from "antd";
+import { Card, Form, InputNumber, Button, Flex, Progress, Tag, type ProgressProps, Switch } from "antd";
 import { useState } from "react";
 import { useAdb } from "../api/adb/useAdb";
 import { useTradeMachine } from "../api/statemachine/useTradeMachine";
 import { useOpenCv } from "../api/opencv/useOpenCv";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 
 
@@ -19,6 +20,8 @@ const TradeSettings: React.FC = () => {
 
     const [calibrationInfo, setCalibrationInfo] = useState<{ success: boolean, message: string } | null>(null);
     const [tradeAmount, setTradeAmount] = useState(0);
+    const [remoteTradeButtonVisible, setRemoteTradeButtonVisible] = useState(false);
+    const [needRecalibrate, setNeedRecalibrate] = useState(false);
 
     let progressStatus: ProgressProps["status"] = "normal";
     if (currentMachineState === "ERROR") {
@@ -38,23 +41,24 @@ const TradeSettings: React.FC = () => {
             setCalibrationInfo({ success: false, message: "Calibration failed" })
             return;
         }
-        initialize(dimensions.deviceWidth, dimensions.deviceHeight);
+        initialize(remoteTradeButtonVisible, dimensions.deviceWidth, dimensions.deviceHeight);
         setCalibrationInfo({ success: true, message: `${dimensions.deviceWidth}px / ${dimensions.deviceHeight}px` })
+        setNeedRecalibrate(false); // might have to move up
     }
 
-    const openInfoModal = async () => {
-        Modal.info({
-            title: "Prepare your phone",
-            width: 600,
-            content: <>
-                <Typography.Title level={5}>1. Trade button visible?</Typography.Title>
-                <Typography.Text>Make sure the button to start a trade is visible and not covered by other buttons (e.g. the close button on small devices).</Typography.Text>
-                <Typography.Title level={5}>2. Complete one manual trade</Typography.Title>
-                <Typography.Text>Complete one manual trade so the search string or tag remains in the mon selection menu.</Typography.Text>
-            </>
-            
-        })
-    }
+    // const openInfoModal = async () => {
+    //     Modal.info({
+    //         title: "Prepare your phone",
+    //         width: 600,
+    //         content: <>
+    //             <Typography.Title level={5}>1. Trade button visible?</Typography.Title>
+    //             <Typography.Text>Make sure the button to start a trade is visible and not covered by other buttons (e.g. the close button on small devices).</Typography.Text>
+    //             <Typography.Title level={5}>2. Complete one manual trade</Typography.Title>
+    //             <Typography.Text>Complete one manual trade so the search string or tag remains in the mon selection menu.</Typography.Text>
+    //         </>
+
+    //     })
+    // }
 
     return <Card title="Trade Settings" variant="borderless" style={{ width: 300 }}>
         <Form layout="vertical">
@@ -68,16 +72,20 @@ const TradeSettings: React.FC = () => {
                 />
             </Form.Item>
 
+            <Form.Item label="Remote trade button visible">
+                <Switch disabled={currentMachineState === "RUNNING"} value={remoteTradeButtonVisible} onChange={() => { setRemoteTradeButtonVisible((prev) => !prev); setNeedRecalibrate(true) }} />
+            </Form.Item>
             <Form.Item label="Calibrate for your device">
                 <Flex gap={8} align="center">
                     <Button
                         type="primary"
                         onClick={handleCalibrate}
                         disabled={!adbReady || currentMachineState === "RUNNING"}
+                        icon={needRecalibrate && calibrationInfo ? <ExclamationCircleOutlined /> : null}
                     >
-                        Calibrate
+                        {needRecalibrate && calibrationInfo ? "Recalibrate" : "Calibrate"}
                     </Button>
-                    {calibrationInfo && <Tag color={calibrationInfo?.success ? "green" : "red"} variant={"outlined"}>
+                    {calibrationInfo && !needRecalibrate && <Tag color={calibrationInfo?.success ? "green" : "red"} variant={"outlined"}>
                         {calibrationInfo?.message}
                     </Tag>}
                 </Flex>
@@ -90,12 +98,12 @@ const TradeSettings: React.FC = () => {
 
             <Form.Item >
                 <Button
-                    style={{width: "100%"}}
+                    style={{ width: "100%" }}
                     type="primary"
                     onClick={() =>
                         currentMachineState === "RUNNING" ? stop() : start(tradeAmount)
                     }
-                    disabled={!adbReady || !openCvReady || !tmReady}
+                    disabled={!adbReady || !openCvReady || !tmReady || needRecalibrate}
                 >
                     {currentMachineState === "RUNNING" ? "Abort" : "Start"}
                 </Button>
