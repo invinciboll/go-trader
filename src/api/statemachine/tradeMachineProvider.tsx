@@ -72,8 +72,6 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     const processStep = async (currentStep: TradeStep) => {
-        const templateUrl = TEMPLATES[currentStep];
-
         for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
             if (stopRef.current) return false;
 
@@ -87,7 +85,7 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
                 setCurrentScreenshotUrl(screenshotUrl);
             }
 
-            const match = await findMatchInScreenshot(screenshotUrl, templateUrl);
+            const match = await findMatchInScreenshot(screenshotUrl, currentStep);
             const accept = match.score > MATCH_THRESHOLDS[currentStep];
 
             const debugUrl = await drawMatchOnScreenshot(screenshotUrl, match, accept);
@@ -101,23 +99,23 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
                 return;
             }
 
-            const expired = await findMatchInScreenshot(
-                screenshotUrl,
-                EXCEPTION_TEMPLATES["expired"],
-            );
-            if (expired.score > 0.9) {
-                setMachineError(`[Step ${currentStep}] failed. Trade Expired.`);
-                return;
-            }
+            // const expired = await findMatchInScreenshot(
+            //     screenshotUrl,
+            //     EXCEPTION_TEMPLATES["expired"],
+            // );
+            // if (expired.score > 0.9) {
+            //     setMachineError(`[Step ${currentStep}] failed. Trade Expired.`);
+            //     return;
+            // }
 
-            const special = await findMatchInScreenshot(
-                screenshotUrl,
-                EXCEPTION_TEMPLATES["special"],
-            );
-            if (special.score > 0.9) {
-                setMachineError(`[Step ${currentStep}] failed. Special Trade detected.`);
-                return;
-            }
+            // const special = await findMatchInScreenshot(
+            //     screenshotUrl,
+            //     EXCEPTION_TEMPLATES["special"],
+            // );
+            // if (special.score > 0.9) {
+            //     setMachineError(`[Step ${currentStep}] failed. Special Trade detected.`);
+            //     return;
+            // }
 
             await sleep(RETRY_DELAY_MS);
         }

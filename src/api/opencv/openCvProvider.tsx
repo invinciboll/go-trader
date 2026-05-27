@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { OpenCvContext, type MatchResult } from "./openCvContext";
-import cv from "@techstark/opencv-js";
-import { useAdb } from "../adb/useAdb";
+import cv, { Exception } from "@techstark/opencv-js";
+import { TEMPLATES, TradeStep } from "../statemachine/constants";
+
 
 const referenceDevice = {
     HEIGHT: 2400,
@@ -27,28 +28,69 @@ const urlToMat = (url: string): Promise<cv.Mat> => {
 export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
-    const [scalingFactors, setScalingFactors] = useState<{ widthFactor: number, heightFactor: number } | null>(null);
-    const isReady = scalingFactors != null;
+
+    const [isReady, setIsReady] = useState(false);
+
+    const templateCache = useRef<
+        Map<TradeStep, cv.Mat>
+    >(new Map());
 
     const initialize = (deviceWidth: number, deviceHeight: number) => {
-        setScalingFactors({ 
-            widthFactor: deviceWidth / referenceDevice.WIDTH, 
-            heightFactor: deviceHeight / referenceDevice.HEIGHT
-        });
+        const widthFactor = deviceWidth / referenceDevice.WIDTH;
+        const heightFactor = deviceHeight / referenceDevice.HEIGHT;
+
+        preloadTemplates(widthFactor, heightFactor);
+    }
+
+    async function preloadTemplates(
+        widthFactor: number,
+        heightFactor: number
+    ) {
+        for (const [step, templateUrl] of Object.entries(TEMPLATES)) {
+
+            const tradeStep = Number(step) as TradeStep;
+
+            const original = await urlToMat(templateUrl);
+            const scaled = new cv.Mat();
+
+            cv.resize(
+                original,
+                scaled,
+                new cv.Size(
+                    Math.round(
+                        original.cols * widthFactor
+                    ),
+                    Math.round(
+                        original.rows * heightFactor
+                    )
+                ),
+                0,
+                0,
+                widthFactor < 1 || heightFactor < 1
+                    ? cv.INTER_AREA
+                    : cv.INTER_LINEAR
+            );
+
+            original.delete();
+            templateCache.current.set(tradeStep, scaled);
+        }
+        setIsReady(true);
     }
 
     async function findMatchInScreenshot(
         screenshotUrl: string,
-        buttonUrl: string,
+        tradeStep: TradeStep,
     ): Promise<MatchResult> {
-        console.log("[findButton] Loading src:", screenshotUrl);
-        console.log("[findButton] Loading tpl:", buttonUrl);
-
+        const tpl = templateCache.current.get(tradeStep);
+        if (!tpl) {
+            throw new Error(
+                `Unable to load template from cache for trade step ${tradeStep}`
+            );
+        }
         const src = await urlToMat(screenshotUrl);
-        const tpl = await urlToMat(buttonUrl);
 
-        console.log("[findButton] src size:", src.cols, "x", src.rows, "| type:", src.type(), "| empty:", src.empty());
-        console.log("[findButton] tpl size:", tpl.cols, "x", tpl.rows, "| type:", tpl.type(), "| empty:", tpl.empty());
+        // console.log("[findButton] src size:", src.cols, "x", src.rows, "| type:", src.type(), "| empty:", src.empty());
+        // console.log("[findButton] tpl size:", tpl.cols, "x", tpl.rows, "| type:", tpl.type(), "| empty:", tpl.empty());
 
         if (src.empty()) throw new Error("Source image Mat is empty — urlToMat likely failed for screenshot");
         if (tpl.empty()) throw new Error("Template Mat is empty — urlToMat likely failed for button image");
@@ -65,18 +107,14 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
         const minMax = (cv as any).minMaxLoc(result);
         console.log("[findButton] match score:", minMax.maxVal, "| location:", minMax.maxLoc);
 
-        const tplWidth = tpl.cols;
-        const tplHeight = tpl.rows;
-
         src.delete();
-        tpl.delete();
         result.delete();
 
         return {
             score: minMax.maxVal,
             location: minMax.maxLoc,
-            width: tplWidth,
-            height: tplHeight,
+            width: tpl.cols,
+            height: tpl.rows,
         };
     }
 

@@ -1,4 +1,4 @@
-import { Card, Form, InputNumber, Button, Flex, Progress, Tag, type ProgressProps } from "antd";
+import { Card, Form, InputNumber, Button, Flex, Progress, Tag, type ProgressProps, Typography } from "antd";
 import { useState } from "react";
 import { useAdb } from "../api/adb/useAdb";
 import { useTradeMachine } from "../api/statemachine/useTradeMachine";
@@ -15,7 +15,7 @@ const TradeSettings: React.FC = () => {
         stop,
     } = useTradeMachine();
 
-    const [calibrationInfo, setCalibrationInfo] = useState<string|null>(null);
+    const [calibrationInfo, setCalibrationInfo] = useState<{ success: boolean, message: string } | null>(null);
     const [tradeAmount, setTradeAmount] = useState(0);
 
     let progressStatus: ProgressProps["status"] = "normal";
@@ -33,16 +33,16 @@ const TradeSettings: React.FC = () => {
     const handleCalibrate = async () => {
         const dimensions = await getDeviceDimensions()
         if (!dimensions) {
-            setCalibrationInfo("Calibration failed.")
+            setCalibrationInfo({ success: false, message: "Calibration failed" })
             return;
         }
         initialize(dimensions.deviceWidth, dimensions.deviceHeight);
-        setCalibrationInfo(`Detected ${dimensions.deviceWidth}px / ${dimensions.deviceHeight}px`)
+        setCalibrationInfo({ success: true, message: `${dimensions.deviceWidth}px / ${dimensions.deviceHeight}px` })
     }
 
     return <Card title="Trade Settings" variant="borderless" style={{ width: 300 }}>
         <Form layout="vertical">
-            <Form.Item label="Input number of trades">
+            <Form.Item label="Number of trades">
                 <InputNumber
                     min={1}
                     max={100}
@@ -52,18 +52,24 @@ const TradeSettings: React.FC = () => {
                 />
             </Form.Item>
 
-            <Form.Item>
-                <Button
-                    type="primary"
-                    onClick={handleCalibrate}
-                    disabled={!adbReady}
-                >
-                    Calibrate
-                </Button>
+            <Form.Item label="Calibrate for your device">
+                <Flex gap={8} align="center">
+                    <Button
+                        type="primary"
+                        onClick={handleCalibrate}
+                        disabled={!adbReady || currentMachineState === "RUNNING"}
+                    >
+                        Calibrate
+                    </Button>
+                    {calibrationInfo && <Tag color={calibrationInfo?.success ? "green" : "red"} variant={"outlined"}>
+                        {calibrationInfo?.message}
+                    </Tag>}
+                </Flex>
             </Form.Item>
 
-            <Form.Item label={calibrationInfo}>
+            <Form.Item >
                 <Button
+                    style={{width: "100%"}}
                     type="primary"
                     onClick={() =>
                         currentMachineState === "RUNNING" ? stop() : start(tradeAmount)
@@ -73,7 +79,7 @@ const TradeSettings: React.FC = () => {
                     {currentMachineState === "RUNNING" ? "Abort" : "Start"}
                 </Button>
             </Form.Item>
-            {currentMachineState} {tmReady ? "tmRdy" : "tmOff"} {adbReady ? "adbRdy" : "adbOff"} {openCvReady? "cvRdy" : "cvOff"}
+            {/* {currentMachineState} {tmReady ? "tmRdy" : "tmOff"} {adbReady ? "adbRdy" : "adbOff"} {openCvReady ? "cvRdy" : "cvOff"} */}
             {currentMachineState !== "OFF" && currentMachineState !== "STOPPED" && <Form.Item label="Trade Progress">
                 <Flex align="center" gap={8}>
                     <Progress
