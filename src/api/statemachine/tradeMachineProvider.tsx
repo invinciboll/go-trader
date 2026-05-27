@@ -1,7 +1,7 @@
 import React, { useMemo, useRef, useState } from "react";
 
 import { TradeMachineContext } from "./tradeMachineContext";
-import { DELAY_AFTER_TAP, EXCEPTION_TEMPLATES, MATCH_THRESHOLDS, MAX_RETRIES, RETRY_DELAY_MS, SCREENSHOT_FAIL_DELAY_MS, STEPS_IN_ORDER, TEMPLATES, TradeStep, type TradeMachineState } from "./constants";
+import { DELAY_AFTER_TAP, MATCH_THRESHOLDS, MAX_RETRIES, RETRY_DELAY_MS, SCREENSHOT_FAIL_DELAY_MS, STEPS_IN_ORDER, TradeStep, type TradeMachineState } from "./constants";
 import { useOpenCv } from "../opencv/useOpenCv";
 import { useAdb } from "../adb/useAdb";
 import { getErrorMessage } from "./error";
@@ -54,11 +54,11 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
 
         for (let i = 0; i < numberOfTrades; i++) {
             if (stopRef.current) return;
-            console.log("Trade", i);
+
             for (const tradeStep of STEPS_IN_ORDER) {
                 if (stopRef.current) return;
                 setCurrentStep(tradeStep); // Update Observers
-                console.log("Step", tradeStep);
+
                 try {
                     await processStep(tradeStep);
                 } catch (error: unknown) {
@@ -69,6 +69,7 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
             }
             setCurrentTradeIndex((prev) => prev + 1);
         }
+        setCurrentMachineState("SUCCESS");
     };
 
     const processStep = async (currentStep: TradeStep) => {
@@ -76,7 +77,6 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
             if (stopRef.current) return false;
 
             const screenshotUrl = await takeScreenshot();
-            console.log(screenshotUrl);
             if (!screenshotUrl) {
                 // Rare case where screenshot fails
                 await sleep(SCREENSHOT_FAIL_DELAY_MS);

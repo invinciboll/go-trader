@@ -47,7 +47,7 @@ const TradeProgress: React.FC  = () => {
   if (currentMachineState === "OFF") {
     return null;
   }
-
+  
   const items = [
     "Starting Trade",
     "Selecting Mon",

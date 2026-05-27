@@ -1,8 +1,10 @@
-import { Card, Form, InputNumber, Button, Flex, Progress, Tag, type ProgressProps, Typography } from "antd";
+import { Card, Form, InputNumber, Button, Flex, Progress, Tag, type ProgressProps, Switch, Modal, Typography } from "antd";
 import { useState } from "react";
 import { useAdb } from "../api/adb/useAdb";
 import { useTradeMachine } from "../api/statemachine/useTradeMachine";
 import { useOpenCv } from "../api/opencv/useOpenCv";
+
+
 
 const TradeSettings: React.FC = () => {
     const { isReady: adbReady, getDeviceDimensions } = useAdb();
@@ -40,6 +42,20 @@ const TradeSettings: React.FC = () => {
         setCalibrationInfo({ success: true, message: `${dimensions.deviceWidth}px / ${dimensions.deviceHeight}px` })
     }
 
+    const openInfoModal = async () => {
+        Modal.info({
+            title: "Prepare your phone",
+            width: 600,
+            content: <>
+                <Typography.Title level={5}>1. Trade button visible?</Typography.Title>
+                <Typography.Text>Make sure the button to start a trade is visible and not covered by other buttons (e.g. the close button on small devices).</Typography.Text>
+                <Typography.Title level={5}>2. Complete one manual trade</Typography.Title>
+                <Typography.Text>Complete one manual trade so the search string or tag remains in the mon selection menu.</Typography.Text>
+            </>
+            
+        })
+    }
+
     return <Card title="Trade Settings" variant="borderless" style={{ width: 300 }}>
         <Form layout="vertical">
             <Form.Item label="Number of trades">
@@ -66,6 +82,11 @@ const TradeSettings: React.FC = () => {
                     </Tag>}
                 </Flex>
             </Form.Item>
+
+            {/* <Form.Item label="Prepared trade window">
+                <Switch onClick={openInfoModal}/>
+            </Form.Item> */}
+
 
             <Form.Item >
                 <Button

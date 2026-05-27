@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useState } from "react";
 import { OpenCvContext, type MatchResult } from "./openCvContext";
-import cv, { Exception } from "@techstark/opencv-js";
+import cv from "@techstark/opencv-js";
 import { TEMPLATES, TradeStep } from "../statemachine/constants";
 
 
@@ -36,9 +36,15 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
     >(new Map());
 
     const initialize = (deviceWidth: number, deviceHeight: number) => {
-        const widthFactor = deviceWidth / referenceDevice.WIDTH;
-        const heightFactor = deviceHeight / referenceDevice.HEIGHT;
+        // Only scale if width differs
+        let widthFactor = 1;
+        let heightFactor = 1;
 
+        if (deviceWidth !== referenceDevice.WIDTH) {
+            widthFactor = deviceWidth / referenceDevice.WIDTH;
+            heightFactor = deviceHeight / referenceDevice.HEIGHT;
+        } 
+        
         preloadTemplates(widthFactor, heightFactor);
     }
 
@@ -46,6 +52,7 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
         widthFactor: number,
         heightFactor: number
     ) {
+        // console.log("preloading factors", widthFactor, heightFactor);
         for (const [step, templateUrl] of Object.entries(TEMPLATES)) {
 
             const tradeStep = Number(step) as TradeStep;
@@ -70,7 +77,7 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
                     ? cv.INTER_AREA
                     : cv.INTER_LINEAR
             );
-
+            // console.log(widthFactor, original.cols, scaled.cols, heightFactor, original.rows, scaled.rows)
             original.delete();
             templateCache.current.set(tradeStep, scaled);
         }
@@ -105,7 +112,7 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
         cv.matchTemplate(src, tpl, result, cv.TM_CCOEFF_NORMED);
 
         const minMax = (cv as any).minMaxLoc(result);
-        console.log("[findButton] match score:", minMax.maxVal, "| location:", minMax.maxLoc);
+        // console.log("[findButton] match score:", minMax.maxVal, "| location:", minMax.maxLoc);
 
         src.delete();
         result.delete();

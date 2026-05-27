@@ -33,10 +33,10 @@ export const EXCEPTION_TEMPLATES: Record<string, string> = {
 
 
 export const MATCH_THRESHOLDS: Record<TradeStep, number> = {
-  [TradeStep.START_TRADE]: 0.55,
-  [TradeStep.SELECT_MON]: 0.9,
-  [TradeStep.CONFIRM_MON]: 0.9,
-  [TradeStep.CONFIRM_TRADE]: 0.9,
+  [TradeStep.START_TRADE]: 0.6,
+  [TradeStep.SELECT_MON]: 0.75,
+  [TradeStep.CONFIRM_MON]: 0.75,
+  [TradeStep.CONFIRM_TRADE]: 0.75,
   [TradeStep.CLOSE]: 0.75,
 };
 

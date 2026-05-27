@@ -39,7 +39,7 @@ const ConnectSteps: React.FC= () => {
           setConnection(con);
         }
       } catch (error: unknown) {
-        console.log(error);
+        console.error(error);
         // Modal.error({
         //     title: "error"
         //   }
