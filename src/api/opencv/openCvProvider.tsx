@@ -132,12 +132,12 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const value = useMemo(
         () => ({
-            initialize,
             isReady,
+            initialize,
             findMatchInScreenshot,
             drawMatchOnScreenshot,
         }),
-        [initialize, isReady]
+        [isReady]
     );
 
     return <OpenCvContext.Provider value={value}>{children}</OpenCvContext.Provider>;

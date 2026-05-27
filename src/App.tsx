@@ -10,14 +10,14 @@ import { TradeMachineProvider } from "./api/statemachine/tradeMachineProvider";
 function App() {
   return (
     <Layout>
-      <Header style={{ paddingLeft: 250, paddingRight: 250, backgroundColor: "white" }}>
+      <Header style={{ paddingLeft: 150, paddingRight: 150, backgroundColor: "white" }}>
         <Flex align="center">
           <Typography.Title level={1} style={{ margin: 0 }}>
             Go Trader
           </Typography.Title>
         </Flex>
       </Header>
-      <Content style={{ paddingLeft: 250, paddingRight: 250, paddingBottom: 40 }}>
+      <Content style={{ paddingLeft: 150, paddingRight: 150, paddingBottom: 40 }}>
         <AdbProvider>
           <OpenCvProvider>
             <TradeMachineProvider>

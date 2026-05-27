@@ -17,7 +17,6 @@ export const AdbProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
     const [adb, setAdb] = useState<Adb | null>(null);
-
     const isReady = !!adb;
 
     const initialize = (adb: Adb) => setAdb(adb);

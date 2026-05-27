@@ -48,16 +48,17 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const start = async (numberOfTrades: number) => {
         if (!isReady || currentMachineState === "RUNNING") return;
+
         reset();
         setCurrentMachineState("RUNNING");
 
         for (let i = 0; i < numberOfTrades; i++) {
             if (stopRef.current) return;
-
+            console.log("Trade", i);
             for (const tradeStep of STEPS_IN_ORDER) {
                 if (stopRef.current) return;
                 setCurrentStep(tradeStep); // Update Observers
-
+                console.log("Step", tradeStep);
                 try {
                     await processStep(tradeStep);
                 } catch (error: unknown) {
@@ -71,14 +72,13 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     const processStep = async (currentStep: TradeStep) => {
-        if (!isReady || currentMachineState !== "RUNNING") return;
-
         const templateUrl = TEMPLATES[currentStep];
 
         for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
             if (stopRef.current) return false;
 
             const screenshotUrl = await takeScreenshot();
+            console.log(screenshotUrl);
             if (!screenshotUrl) {
                 // Rare case where screenshot fails
                 await sleep(SCREENSHOT_FAIL_DELAY_MS);
@@ -139,7 +139,14 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
             stop,
             reset,
         }),
-        []
+        [
+            isReady,
+            currentMachineState,
+            currentTradeIndex,
+            currentTradeStep,
+            currentScreenshotUrl,
+            errorMsg,
+        ]
     );
 
     return <TradeMachineContext.Provider value={value}>{children}</TradeMachineContext.Provider>;

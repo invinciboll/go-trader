@@ -8,7 +8,7 @@ export type AdbContextValue = {
     deinitialize: () => void;
     tapScreen: (x: number, y: number) => Promise<void>;
     takeScreenshot: () => Promise<string | null>;
-    getDeviceDimensions: () => { deviceWidth: number, deviceHeight: number } | null;
+    getDeviceDimensions: () => Promise<{ deviceWidth: number, deviceHeight: number } | null>;
 };
 
 export const AdbContext = createContext<AdbContextValue | null>(null);

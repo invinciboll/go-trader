@@ -6,8 +6,9 @@ import { useOpenCv } from "../api/opencv/useOpenCv";
 
 const TradeSettings: React.FC = () => {
     const { isReady: adbReady, getDeviceDimensions } = useAdb();
-    const { initialize } = useOpenCv();
+    const { isReady: openCvReady, initialize } = useOpenCv();
     const {
+        isReady: tmReady,
         currentMachineState,
         currentTradeIndex,
         start,
@@ -31,7 +32,6 @@ const TradeSettings: React.FC = () => {
 
     const handleCalibrate = async () => {
         const dimensions = await getDeviceDimensions()
-        console.log(dimensions);
         if (!dimensions) {
             setCalibrationInfo("Calibration failed.")
             return;
@@ -68,12 +68,12 @@ const TradeSettings: React.FC = () => {
                     onClick={() =>
                         currentMachineState === "RUNNING" ? stop() : start(tradeAmount)
                     }
-                    disabled={!adbReady}
+                    disabled={!adbReady || !openCvReady || !tmReady}
                 >
                     {currentMachineState === "RUNNING" ? "Abort" : "Start"}
                 </Button>
             </Form.Item>
-
+            {currentMachineState} {tmReady ? "tmRdy" : "tmOff"} {adbReady ? "adbRdy" : "adbOff"} {openCvReady? "cvRdy" : "cvOff"}
             {currentMachineState !== "OFF" && currentMachineState !== "STOPPED" && <Form.Item label="Trade Progress">
                 <Flex align="center" gap={8}>
                     <Progress
