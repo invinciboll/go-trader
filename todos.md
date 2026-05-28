@@ -1,3 +1,4 @@
-- Info popup for start
-- After 10 failed attempts, try step before.
-- Reset/hide counter when input changes 
+- closing need to check for height records
+- add speciual trade and expired detection
+- complete info pop up
+- add dark mode

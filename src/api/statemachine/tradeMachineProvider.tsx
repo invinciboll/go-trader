@@ -12,7 +12,7 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
     const { isReady: adbReady, takeScreenshot, tapScreen } = useAdb();
-    const { isReady: openCvReady, findMatchInScreenshot, drawMatchOnScreenshot } = useOpenCv();
+    const { isReady: openCvReady, selectMonYOffset, findMatchInScreenshot, drawMatchOnScreenshot } = useOpenCv();
     const isReady = adbReady && openCvReady;
 
     const [currentMachineState, setCurrentMachineState] = useState<TradeMachineState>("OFF");
@@ -92,9 +92,14 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
             setCurrentScreenshotUrl(debugUrl);
 
             if (accept) {
-                const centerX = match.location.x + match.width / 2;
-                const centerY = match.location.y + match.height / 2;
-                await tapScreen(centerX, centerY);
+                const tapX = match.location.x + match.width / 2;
+                let tapY = match.location.y + match.height / 2;
+
+                if (currentStep === TradeStep.SELECT_MON) {
+                    tapY += selectMonYOffset;
+                }
+
+                await tapScreen(tapX, tapY);
                 await sleep(DELAY_AFTER_TAP[currentStep]);
                 return;
             }

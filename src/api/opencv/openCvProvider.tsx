@@ -7,6 +7,7 @@ import { TEMPLATES, TradeStep } from "../statemachine/constants";
 const referenceDevice = {
     HEIGHT: 2400,
     WIDTH: 1080,
+    SELECT_MON_Y_OFFSET: 400
 }
 
 const urlToMat = (url: string): Promise<cv.Mat> => {
@@ -30,6 +31,7 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
 
     const [isReady, setIsReady] = useState(false);
+    const [selectMonYOffset, setselectMonYOffset] = useState(0);
 
     const templateCache = useRef<
         Map<TradeStep, cv.Mat>
@@ -37,13 +39,18 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const initialize = (remoteTradeButtonVisible: boolean, deviceWidth: number, deviceHeight: number) => {
         // Only scale if width differs
-        let widthFactor = 1 ;
-        let heightFactor = 1;
+        let widthFactor: number;
+        let heightFactor: number;
 
         if (deviceWidth !== referenceDevice.WIDTH) {
             widthFactor = deviceWidth / referenceDevice.WIDTH;
             heightFactor = deviceHeight / referenceDevice.HEIGHT;
-        } 
+            setselectMonYOffset(Math.round(referenceDevice.SELECT_MON_Y_OFFSET * heightFactor));
+        } else {
+            widthFactor = 1;
+            heightFactor = 1;
+            setselectMonYOffset(referenceDevice.SELECT_MON_Y_OFFSET);
+        }
         
         preloadTemplates(remoteTradeButtonVisible, widthFactor, heightFactor);
     }
@@ -182,11 +189,12 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
     const value = useMemo(
         () => ({
             isReady,
+            selectMonYOffset,
             initialize,
             findMatchInScreenshot,
             drawMatchOnScreenshot,
         }),
-        [isReady]
+        [isReady, selectMonYOffset]
     );
 
     return <OpenCvContext.Provider value={value}>{children}</OpenCvContext.Provider>;
