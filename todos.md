@@ -1,2 +1,0 @@
-- complete info pop up
-- add dark mode

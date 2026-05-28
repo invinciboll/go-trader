@@ -1,5 +1,5 @@
-import { Flex, Layout, Menu, Switch, Typography } from "antd";
-import { Header, Content, Footer } from "antd/es/layout/layout";
+import { Flex, Layout, Switch, Typography } from "antd";
+import { Header, Content } from "antd/es/layout/layout";
 import TradingWindow from "./components/TradingWindow";
 import InfoText from "./components/InfoText";
 import { AdbProvider } from "./api/adb/adbProvider";
