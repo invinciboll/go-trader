@@ -12,12 +12,12 @@ const InfoText: React.FC = () => (
     <Paragraph>
       Go-Trader automates button inputs on android devices. It periodically captures
       screenshots via WebADB, uses OpenCV to locate specific buttons in those images, and
-      then triggers touch input on the device — no manual tapping required.
+      then triggers touch input on the device, so no manual tapping is required.
     </Paragraph>
 
     <Title level={3}>What about your data?</Title>
     <Paragraph>
-      Everything runs locally in your browser — nothing is sent to any server. The full
+      Everything runs locally in your browser, no data is sent to any server. The full
       source code is available on{' '}
       <Link target="_blank" href="https://github.com/invinciboll/go-trader">
         GitHub

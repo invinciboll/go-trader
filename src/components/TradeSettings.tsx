@@ -4,6 +4,7 @@ import { useAdb } from "../api/adb/useAdb";
 import { useTradeMachine } from "../api/statemachine/useTradeMachine";
 import { useOpenCv } from "../api/opencv/useOpenCv";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
+import { TradeInfoModal } from "./TradeInfoModal";
 
 
 
@@ -22,6 +23,8 @@ const TradeSettings: React.FC = () => {
     const [tradeAmount, setTradeAmount] = useState(0);
     const [remoteTradeButtonVisible, setRemoteTradeButtonVisible] = useState(false);
     const [needRecalibrate, setNeedRecalibrate] = useState(false);
+    const [tradeInfoModalVisible, setTradeInfoModalVisible] = useState(false);
+    const [userConfirmedPrep, setUserConfirmedPrep] = useState(false);
 
     let progressStatus: ProgressProps["status"] = "normal";
     if (currentMachineState === "ERROR") {
@@ -45,20 +48,6 @@ const TradeSettings: React.FC = () => {
         setCalibrationInfo({ success: true, message: `${dimensions.deviceWidth}px / ${dimensions.deviceHeight}px` })
         setNeedRecalibrate(false); // might have to move up
     }
-
-    // const openInfoModal = async () => {
-    //     Modal.info({
-    //         title: "Prepare your phone",
-    //         width: 600,
-    //         content: <>
-    //             <Typography.Title level={5}>1. Trade button visible?</Typography.Title>
-    //             <Typography.Text>Make sure the button to start a trade is visible and not covered by other buttons (e.g. the close button on small devices).</Typography.Text>
-    //             <Typography.Title level={5}>2. Complete one manual trade</Typography.Title>
-    //             <Typography.Text>Complete one manual trade so the search string or tag remains in the mon selection menu.</Typography.Text>
-    //         </>
-
-    //     })
-    // }
 
     return <Card title="Trade Settings" variant="borderless" style={{ width: 300 }}>
         <Form layout="vertical">
@@ -91,9 +80,9 @@ const TradeSettings: React.FC = () => {
                 </Flex>
             </Form.Item>
 
-            {/* <Form.Item label="Prepared trade window">
-                <Switch onClick={openInfoModal}/>
-            </Form.Item> */}
+            <Form.Item label="Prepared application">
+                <Switch disabled={currentMachineState === "RUNNING"} onClick={setTradeInfoModalVisible} value={userConfirmedPrep} onChange={setUserConfirmedPrep}/>
+            </Form.Item>
 
 
             <Form.Item >
@@ -103,7 +92,7 @@ const TradeSettings: React.FC = () => {
                     onClick={() =>
                         currentMachineState === "RUNNING" ? stop() : start(tradeAmount)
                     }
-                    disabled={!adbReady || !openCvReady || !tmReady || needRecalibrate}
+                    disabled={!adbReady || !openCvReady || !tmReady || needRecalibrate || !userConfirmedPrep}
                 >
                     {currentMachineState === "RUNNING" ? "Abort" : "Start"}
                 </Button>
@@ -122,6 +111,7 @@ const TradeSettings: React.FC = () => {
                 </Flex>
             </Form.Item>}
         </Form>
+        <TradeInfoModal open={tradeInfoModalVisible} onClose={() => setTradeInfoModalVisible(false)}/>
     </Card>
 };
 
