@@ -34,7 +34,7 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
     const [selectMonYOffset, setselectMonYOffset] = useState(0);
 
     const templateCache = useRef<
-        Map<TradeStep, cv.Mat>
+        Map<TradeStep | "special" | "expired" | "sizeRecord", cv.Mat>
     >(new Map());
 
     const initialize = (remoteTradeButtonVisible: boolean, deviceWidth: number, deviceHeight: number) => {
@@ -63,7 +63,13 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
         // console.log("preloading factors", widthFactor, heightFactor);
         for (const [step, templateUrl] of Object.entries(TEMPLATES)) {
 
-            const tradeStep = Number(step) as TradeStep;
+            let tradeStep: TradeStep | 'special' | "expired" | "sizeRecord";
+
+            if (step === "special" || step === "expired" || step === "sizeRecord") {
+                tradeStep = step;
+            } else {
+                tradeStep = Number(step) as TradeStep;
+            }
 
             const original = await urlToMat(templateUrl);
             const scaled = new cv.Mat();
@@ -97,7 +103,7 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
 
     async function findMatchInScreenshot(
         screenshotUrl: string,
-        tradeStep: TradeStep,
+        tradeStep: TradeStep | "special" | "expired" | "sizeRecord",
     ): Promise<MatchResult> {
         const tpl = templateCache.current.get(tradeStep);
         if (!tpl) {

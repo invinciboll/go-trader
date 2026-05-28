@@ -1,4 +1,2 @@
-- closing need to check for height records
-- add speciual trade and expired detection
 - complete info pop up
 - add dark mode

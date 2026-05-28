@@ -5,8 +5,11 @@ import { DELAY_AFTER_TAP, MATCH_THRESHOLDS, MAX_RETRIES, RETRY_DELAY_MS, SCREENS
 import { useOpenCv } from "../opencv/useOpenCv";
 import { useAdb } from "../adb/useAdb";
 import { getErrorMessage } from "./error";
+import type { MatchResult } from "../opencv/openCvContext";
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+
 
 export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
@@ -43,7 +46,43 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const setMachineError = (errorMsg: string) => {
         setCurrentMachineState("ERROR");
+        stopRef.current = true;
         setErrorMsg(errorMsg);
+    }
+
+    const findOneMatchInScreenshot = async (screenshotUrl: string, currentStep: TradeStep): Promise<{ match: MatchResult, accept: boolean, errorMsg: string | null }> => {
+        // Check if match is there
+        let match = await findMatchInScreenshot(screenshotUrl, currentStep);
+        let accept = match.score > MATCH_THRESHOLDS[currentStep];
+        if (accept) {
+            return { match, accept, errorMsg: null }
+        }
+
+        // If we are in TradeStep.CLOSE check for alternate variant
+        if (currentStep === TradeStep.CLOSE) {
+            match = await findMatchInScreenshot(screenshotUrl, "sizeRecord");
+            accept = match.score > MATCH_THRESHOLDS["sizeRecord"];
+            if (accept) {
+                return { match, accept, errorMsg: null }
+            }
+        }
+
+        // Check if "special trade" warning is visible
+        const specialMatch = await findMatchInScreenshot(screenshotUrl, "special");
+        accept = specialMatch.score > MATCH_THRESHOLDS["special"];
+        if (accept) {
+            return  {match: specialMatch, accept, errorMsg: "Special trade detected. Stopping trade machine."}
+        }
+
+        // Check if "trade expired" warning is visible
+        const expiredMatch = await findMatchInScreenshot(screenshotUrl, "expired");
+        accept = expiredMatch.score > MATCH_THRESHOLDS["expired"];
+        if (accept) {
+            return  {match: expiredMatch, accept, errorMsg: "Trade expired. Stopping trade machine."}
+        }
+
+        // Return match to show red render box for best attempt.
+        return { match, accept, errorMsg: null }
     }
 
     const start = async (numberOfTrades: number) => {
@@ -85,8 +124,11 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
                 setCurrentScreenshotUrl(screenshotUrl);
             }
 
-            const match = await findMatchInScreenshot(screenshotUrl, currentStep);
-            const accept = match.score > MATCH_THRESHOLDS[currentStep];
+            const {match, accept, errorMsg} = await findOneMatchInScreenshot(screenshotUrl, currentStep);
+            if (errorMsg) {
+                setMachineError(errorMsg);
+                return;
+            }
 
             const debugUrl = await drawMatchOnScreenshot(screenshotUrl, match, accept);
             setCurrentScreenshotUrl(debugUrl);
@@ -103,24 +145,6 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
                 await sleep(DELAY_AFTER_TAP[currentStep]);
                 return;
             }
-
-            // const expired = await findMatchInScreenshot(
-            //     screenshotUrl,
-            //     EXCEPTION_TEMPLATES["expired"],
-            // );
-            // if (expired.score > 0.9) {
-            //     setMachineError(`[Step ${currentStep}] failed. Trade Expired.`);
-            //     return;
-            // }
-
-            // const special = await findMatchInScreenshot(
-            //     screenshotUrl,
-            //     EXCEPTION_TEMPLATES["special"],
-            // );
-            // if (special.score > 0.9) {
-            //     setMachineError(`[Step ${currentStep}] failed. Special Trade detected.`);
-            //     return;
-            // }
 
             await sleep(RETRY_DELAY_MS);
         }

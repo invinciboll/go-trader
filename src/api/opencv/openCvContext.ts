@@ -12,7 +12,7 @@ export type OpenCvContextValue = {
   isReady: boolean;
   selectMonYOffset: number;
   initialize: (remoteTradeButtonVisible: boolean, deviceWidth: number, deviceHeight: number) => void;
-  findMatchInScreenshot: (screenshotUrl: string, tradeStep: TradeStep) => Promise<MatchResult>;
+  findMatchInScreenshot: (screenshotUrl: string, tradeStep: TradeStep | 'special' | "expired" | "sizeRecord") => Promise<MatchResult>;
   drawMatchOnScreenshot: (screenshotUrl: string, match: MatchResult, accept: boolean) => Promise<string>
 };
 
