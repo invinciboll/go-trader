@@ -15,11 +15,16 @@ import "./index.css"
 
 
 function App() {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(localStorage.getItem('dark-mode') === "true");
 
   useEffect(() => {
     document.body.style.backgroundColor = isDark ? "#000" : "#fff";
-}, [isDark]);
+  }, [isDark]);
+
+  const setDarkMode = (checked: boolean) => {
+    localStorage.setItem('dark-mode', String(checked));
+    setIsDark(checked);
+  }
 
   return (
     <ConfigProvider theme={{ algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm }}>
@@ -30,7 +35,7 @@ function App() {
           </Typography.Title>
           <Flex align="center" gap={8}>
             {isDark ? <SunOutlined style={{ color: "white" }} /> : <MoonFilled style={{ color: "white" }} />}
-            <Switch value={isDark} onChange={setIsDark} />
+            <Switch value={isDark} onChange={setDarkMode} />
           </Flex>
         </Header>
         <Content style={{ paddingLeft: 150, paddingRight: 150, paddingBottom: 40 }}>
