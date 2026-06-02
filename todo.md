@@ -1,0 +1,3 @@
+- add remaining time counter
+- add self correction
+- maybe refactor template loading

@@ -12,6 +12,12 @@ export const TradeStep = {
   CLOSE: 4,
 } as const;
 
+type TradeStepName = keyof typeof TradeStep;
+type TradeStepValue = (typeof TradeStep)[TradeStepName];
+export const TradeStepName = Object.fromEntries(
+    Object.entries(TradeStep).map(([k, v]) => [v, k])
+) as Record<TradeStepValue, TradeStepName>;
+
 export type TradeStep = (typeof TradeStep)[keyof typeof TradeStep];
 
 export const STEPS_IN_ORDER = Object.values(TradeStep) as TradeStep[];
@@ -36,14 +42,14 @@ export const EXCEPTION_TEMPLATES: Record<string, string> = {
 
 
 export const MATCH_THRESHOLDS: Record<TradeStep | "special" | "expired" | "sizeRecord", number> = {
-  [TradeStep.START_TRADE]: 0.6,
-  [TradeStep.SELECT_MON]: 0.75,
-  [TradeStep.CONFIRM_MON]: 0.75,
-  [TradeStep.CONFIRM_TRADE]: 0.75,
-  [TradeStep.CLOSE]: 0.75,
-  ["sizeRecord"]: 0.75,
-  ["special"]: 0.75,
-  ["expired"]: 0.75,
+  [TradeStep.START_TRADE]: 0.9,
+  [TradeStep.SELECT_MON]: 0.9,
+  [TradeStep.CONFIRM_MON]: 0.9,
+  [TradeStep.CONFIRM_TRADE]: 0.9,
+  [TradeStep.CLOSE]: 0.9,
+  ["sizeRecord"]: 0.9,
+  ["special"]: 0.9,
+  ["expired"]: 0.9,
 };
 
 export const DELAY_AFTER_TAP: Record<TradeStep, number> = {

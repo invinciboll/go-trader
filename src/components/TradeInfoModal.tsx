@@ -1,20 +1,41 @@
-import { Modal, Typography } from "antd";
+import { useState } from "react";
+import { Modal, Typography, Checkbox, Flex } from "antd";
 
 interface Props {
     open: boolean;
-    onClose?: () => void;
+    onClose: () => void;
 }
 
 export function TradeInfoModal({ open, onClose }: Props) {
+    const [dontShowAgain, setDontShowAgain] = useState(false);
+
+    const handleOk = () => {
+        if (dontShowAgain) {
+            localStorage.setItem("hide-trade-info-modal", "true");
+        }
+        onClose();
+    };
+
     return (
         <Modal
             title="Prepare your phone"
             open={open}
             width={600}
-            onOk={onClose}
+            onOk={handleOk}
             onCancel={onClose}
             cancelButtonProps={{ style: { display: "none" } }}
             okText={"I'm ready"}
+            footer={(_, { OkBtn }) => (
+                <Flex align="center" justify="end" gap={16}>
+                    <Checkbox
+                        checked={dontShowAgain}
+                        onChange={(e) => setDontShowAgain(e.target.checked)}
+                    >
+                        Don't show this again
+                    </Checkbox>
+                    <OkBtn />
+                </Flex>
+            )}
         >
             <>
                 <Typography.Title level={5}>1. Prepare tag or search string </Typography.Title>
@@ -28,4 +49,3 @@ export function TradeInfoModal({ open, onClose }: Props) {
         </Modal>
     );
 }
-

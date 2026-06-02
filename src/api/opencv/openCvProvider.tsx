@@ -32,12 +32,14 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const [isReady, setIsReady] = useState(false);
     const [selectMonYOffset, setselectMonYOffset] = useState(0);
+    const [userDeviceRes, setUserDeviceRes] = useState<{width: number, height: number}>({width: 0, height: 0})
 
     const templateCache = useRef<
         Map<TradeStep | "special" | "expired" | "sizeRecord", cv.Mat>
     >(new Map());
 
     const initialize = (remoteTradeButtonVisible: boolean, deviceWidth: number, deviceHeight: number) => {
+        setUserDeviceRes({width: deviceWidth, height: deviceHeight})
         // Only scale if width differs
         let widthFactor: number;
         let heightFactor: number;
@@ -53,6 +55,12 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
         }
         
         preloadTemplates(remoteTradeButtonVisible, widthFactor, heightFactor);
+    }
+
+    const deinitialize = () => {
+        setIsReady(false);
+        setselectMonYOffset(0);
+        setUserDeviceRes({width: 0, height: 0});
     }
 
     async function preloadTemplates(
@@ -195,8 +203,10 @@ export const OpenCvProvider: React.FC<{ children: React.ReactNode }> = ({
     const value = useMemo(
         () => ({
             isReady,
+            userDeviceRes,
             selectMonYOffset,
             initialize,
+            deinitialize,
             findMatchInScreenshot,
             drawMatchOnScreenshot,
         }),

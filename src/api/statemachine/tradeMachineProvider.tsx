@@ -1,11 +1,13 @@
 import React, { useMemo, useRef, useState } from "react";
 
 import { TradeMachineContext } from "./tradeMachineContext";
-import { DELAY_AFTER_TAP, MATCH_THRESHOLDS, MAX_RETRIES, RETRY_DELAY_MS, SCREENSHOT_FAIL_DELAY_MS, STEPS_IN_ORDER, TradeStep, type TradeMachineState } from "./constants";
+import { DELAY_AFTER_TAP, MATCH_THRESHOLDS, MAX_RETRIES, RETRY_DELAY_MS, SCREENSHOT_FAIL_DELAY_MS, STEPS_IN_ORDER, TradeStep, TradeStepName, type TradeMachineState } from "./constants";
 import { useOpenCv } from "../opencv/useOpenCv";
 import { useAdb } from "../adb/useAdb";
 import { getErrorMessage } from "./error";
 import type { MatchResult } from "../opencv/openCvContext";
+import { useLogger } from "../logger/logger";
+
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -21,12 +23,13 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
     const [currentMachineState, setCurrentMachineState] = useState<TradeMachineState>("OFF");
     const [currentTradeIndex, setCurrentTradeIndex] = useState<number>(0);
 
-    const [currentTradeStep, setCurrentStep] = useState<TradeStep>(TradeStep.START_TRADE);
+    const [currentTradeStep, setCurrentStep] = useState<TradeStep | null>(null);
     const [currentScreenshotUrl, setCurrentScreenshotUrl] = useState<string | null>(null);
-
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [tradeAmount, setTradeAmount] = useState<number>(0);
 
     const stopRef = useRef(false);
+
+    const { log, ok, warn, err, clear } = useLogger();
 
     const reset = () => {
         setCurrentMachineState('OFF');
@@ -34,20 +37,21 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
 
         setCurrentStep(TradeStep.START_TRADE);
         setCurrentScreenshotUrl(null);
+        clear()
 
-        setErrorMsg(null);
         stopRef.current = false;
     }
 
     const stop = () => {
         setCurrentMachineState("STOPPED");
         stopRef.current = true;
+        warn("Trade process aborted.")
     };
 
     const setMachineError = (errorMsg: string) => {
         setCurrentMachineState("ERROR");
         stopRef.current = true;
-        setErrorMsg(errorMsg);
+        err(errorMsg);
     }
 
     const findOneMatchInScreenshot = async (screenshotUrl: string, currentStep: TradeStep): Promise<{ match: MatchResult, accept: boolean, errorMsg: string | null , wasSizeRecord: boolean }> => {
@@ -89,11 +93,12 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!isReady || currentMachineState === "RUNNING") return;
 
         reset();
+        setTradeAmount(numberOfTrades);
         setCurrentMachineState("RUNNING");
 
         for (let i = 0; i < numberOfTrades; i++) {
             if (stopRef.current) return;
-
+            log(`Starting Trade ${i}`);
             for (const tradeStep of STEPS_IN_ORDER) {
                 if (stopRef.current) return;
                 setCurrentStep(tradeStep); // Update Observers
@@ -109,6 +114,7 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
             setCurrentTradeIndex((prev) => prev + 1);
         }
         setCurrentMachineState("SUCCESS");
+        ok("All trades completed.")
     };
 
     const processStep = async (currentStep: TradeStep) => {
@@ -134,13 +140,15 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
             setCurrentScreenshotUrl(debugUrl);
 
             if (accept) {
+                
+                log(`${TradeStepName[currentStep]} matched with confidence ${match.score.toFixed(2)}.`);
                 const tapX = match.location.x + match.width / 2;
                 let tapY = match.location.y + match.height / 2;
 
                 if (currentStep === TradeStep.SELECT_MON) {
                     tapY += selectMonYOffset;
                 }
-
+                
                 await tapScreen(tapX, tapY);
                 await sleep(DELAY_AFTER_TAP[currentStep]);
                 
@@ -155,7 +163,7 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
             await sleep(RETRY_DELAY_MS);
         }
 
-        setMachineError(`[Step ${currentStep}] failed after ${MAX_RETRIES} attempts`);
+        setMachineError(`${TradeStepName[currentStep]} failed after ${MAX_RETRIES} attempts.`);
         return;
     };
 
@@ -167,7 +175,7 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
             currentTradeIndex,
             currentTradeStep,
             currentScreenshotUrl,
-            errorMsg,
+            tradeAmount,
             start,
             stop,
             reset,
@@ -178,7 +186,6 @@ export const TradeMachineProvider: React.FC<{ children: React.ReactNode }> = ({
             currentTradeIndex,
             currentTradeStep,
             currentScreenshotUrl,
-            errorMsg,
         ]
     );
 

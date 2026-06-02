@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Modal, Steps, Typography } from "antd";
+import { App, Button, Steps, Typography } from "antd";
 import {
   AdbDaemonWebUsbConnection,
   AdbDaemonWebUsbDevice,
@@ -9,18 +9,25 @@ import type { StepsProps } from "antd";
 import { Adb, AdbDaemonTransport } from "@yume-chan/adb";
 import AdbWebCredentialStore from "@yume-chan/adb-credential-web";
 import { useAdb } from "../api/adb/useAdb";
-// import type { DeviceBusyError } from "@yume-chan/adb-daemon-webusb/esm/error";
+import { useTradeMachine } from "../api/statemachine/useTradeMachine";
+import { useLogger } from "../api/logger/logger";
+import { useOpenCv } from "../api/opencv/useOpenCv";
 
 
-const ConnectSteps: React.FC= () => {
+
+const ConnectSteps: React.FC = () => {
   const Manager = AdbDaemonWebUsbDeviceManager.BROWSER; // undefined if no WebUSB support
   const [device, setDevice] = useState<AdbDaemonWebUsbDevice | undefined>(
     undefined,
   );
   const [connection, setConnection] =
     useState<AdbDaemonWebUsbConnection | null>(null);
-    
-  const { initialize: setAdb, deinitialize: unsetAdb, isReady: adbReady  } = useAdb();
+
+  const { modal } = App.useApp();
+  const { reset } = useTradeMachine();
+  const { clear } = useLogger();
+  const { deinitialize } = useOpenCv();
+  const { initialize: setAdb, deinitialize: unsetAdb, isReady: adbReady } = useAdb();
 
   const progress = !Manager ? 0 : !device || !connection ? 1 : !adbReady ? 2 : 3;
   const status: StepsProps["status"] = !Manager
@@ -50,7 +57,7 @@ const ConnectSteps: React.FC= () => {
 
   const authenticate = async () => {
     if (!device || !connection) return;
-    const modal = Modal.info({
+    const infoModal = modal.info({
       title: "Check your device",
       content:
         "A connection request should appear on your Android device. Tap 'Allow' to authorize ADB access.",
@@ -68,8 +75,9 @@ const ConnectSteps: React.FC= () => {
       });
       const adb = new Adb(transport);
       setAdb(adb);
+      setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }), 50);
     } finally {
-      modal.destroy();
+      infoModal.destroy();
     }
   };
 
@@ -111,6 +119,9 @@ const ConnectSteps: React.FC= () => {
           unsetAdb();
           setConnection(null);
           setDevice(undefined);
+          clear();
+          reset();
+          deinitialize()
         }
       });
     };
