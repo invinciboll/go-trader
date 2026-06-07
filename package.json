@@ -1,38 +1,37 @@
 {
-  "name": "gotrader",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "bump": "node scripts/bump-build.js",
-    "build": "yarn bump && tsc -b && vite build",
-    "deploy": "yarn build && gh-pages -d dist",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "format": "biome format --write .",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@ant-design/icons": "^6.2.3",
-    "@techstark/opencv-js": "^4.12.0-release.1",
-    "@yume-chan/adb": "^2.6.0",
-    "@yume-chan/adb-credential-web": "^2.1.0",
-    "@yume-chan/adb-daemon-webusb": "^2.3.2",
-    "@yume-chan/stream-extra": "^2.5.3",
-    "antd": "^6.4.3",
-    "biome": "^0.3.3",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6"
-  },
-  "devDependencies": {
-    "@types/node": "^24.12.3",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
-    "gh-pages": "^6.3.0",
-    "knip": "^6.14.2",
-    "typescript": "~6.0.2",
-    "vite": "^8.0.12"
-  }
+	"name": "gotrader",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"bump": "node scripts/bump-build.js",
+		"build": "biome lint && yarn bump && tsc -b && vite build",
+		"deploy": "yarn build && gh-pages -d dist",
+		"preview": "vite preview",
+		"format": "biome check --write ."
+	},
+	"dependencies": {
+		"@ant-design/icons": "^6.2.3",
+		"@techstark/opencv-js": "^4.12.0-release.1",
+		"@yume-chan/adb": "^2.6.0",
+		"@yume-chan/adb-credential-web": "^2.1.0",
+		"@yume-chan/adb-daemon-webusb": "^2.3.2",
+		"@yume-chan/stream-extra": "^2.5.3",
+		"antd": "^6.4.3",
+		"biome": "^0.3.3",
+		"react": "^19.2.6",
+		"react-dom": "^19.2.6"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.16",
+		"@types/node": "^24.12.3",
+		"@types/react": "^19.2.14",
+		"@types/react-dom": "^19.2.3",
+		"@vitejs/plugin-react": "^6.0.1",
+		"gh-pages": "^6.3.0",
+		"knip": "^6.14.2",
+		"typescript": "~6.0.2",
+		"vite": "^8.0.12"
+	}
 }
