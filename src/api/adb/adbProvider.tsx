@@ -18,9 +18,13 @@ export const AdbProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
 	const [adb, setAdb] = useState<Adb | null>(null);
+	const [deviceName, setDeviceName] = useState<string | null>(null);
 	const isReady = !!adb;
 
-	const initialize = useCallback((adb: Adb) => setAdb(adb), []);
+	const initialize = useCallback((adb: Adb, name: string) => {
+		setAdb(adb);
+		setDeviceName(name);
+	}, []);
 
 	const deinitialize = useCallback(() => setAdb(null), []);
 
@@ -76,6 +80,7 @@ export const AdbProvider: React.FC<{ children: React.ReactNode }> = ({
 	const value = useMemo(
 		() => ({
 			adb,
+			deviceName,
 			isReady,
 			initialize,
 			deinitialize,
@@ -85,6 +90,7 @@ export const AdbProvider: React.FC<{ children: React.ReactNode }> = ({
 		}),
 		[
 			adb,
+			deviceName,
 			isReady,
 			deinitialize,
 			getDeviceDimensions,

@@ -5,8 +5,9 @@ import {
 	type AdbDaemonWebUsbDevice,
 	AdbDaemonWebUsbDeviceManager,
 } from '@yume-chan/adb-daemon-webusb';
+import { DeviceBusyError } from '@yume-chan/adb-daemon-webusb/esm/error';
 import type { StepsProps } from 'antd';
-import { App, Button, Steps, Typography } from 'antd';
+import { App, Button, Flex, message, Steps, Typography } from 'antd';
 import type React from 'react';
 import { useEffect, useState } from 'react';
 import { useAdb } from '../api/adb/useAdb';
@@ -56,10 +57,11 @@ const ConnectSteps: React.FC = () => {
 				}
 			} catch (error: unknown) {
 				console.error(error);
-				// Modal.error({
-				//     title: "error"
-				//   }
-				// });
+				if (error instanceof DeviceBusyError) {
+					message.error('Device is already in use by another process.');
+				} else {
+					message.error(String(error));
+				}
 			}
 		}
 	};
@@ -83,7 +85,7 @@ const ConnectSteps: React.FC = () => {
 				credentialStore: new AdbWebCredentialStore('GoTrader'),
 			});
 			const adb = new Adb(transport);
-			setAdb(adb);
+			setAdb(adb, device.name);
 			setTimeout(
 				() =>
 					window.scrollTo({
@@ -92,6 +94,9 @@ const ConnectSteps: React.FC = () => {
 					}),
 				50,
 			);
+		} catch (error: unknown) {
+			console.error(error);
+			message.error(String(error));
 		} finally {
 			infoModal.destroy();
 		}
@@ -149,12 +154,12 @@ const ConnectSteps: React.FC = () => {
 	}, [device, clear, deinitialize, reset, unsetAdb]);
 
 	return (
-		<>
+		<Flex vertical>
 			<Typography.Title level={3}>
 				Connect a device to continue
 			</Typography.Title>
 			<Steps current={progress} items={items} status={status} />
-		</>
+		</Flex>
 	);
 };
 

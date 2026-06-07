@@ -3,8 +3,9 @@ import { createContext } from 'react';
 
 export type AdbContextValue = {
 	adb: Adb | null;
+	deviceName: string | null;
 	isReady: boolean;
-	initialize: (adb: Adb) => void;
+	initialize: (adb: Adb, name: string) => void;
 	deinitialize: () => void;
 	tapScreen: (x: number, y: number) => Promise<void>;
 	takeScreenshot: () => Promise<string | null>;

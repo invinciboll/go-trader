@@ -15,7 +15,7 @@ const TradingLayout: React.FC = () => {
 	if (!adbReady) return null;
 
 	return (
-		<Flex gap={60} align="top" justify="start" style={{ height: maxHeight }}>
+		<Flex gap={20} align="top" justify="start" style={{ height: maxHeight }}>
 			<TradeSettings />
 			{deviceCalibrated && (
 				<>
