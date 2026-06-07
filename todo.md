@@ -1,3 +1,4 @@
-- add remaining time counter
-- add self correction
-- maybe refactor template loading
+- Add 2 more reference devices and scale based on most similar to reduce distortions
+- Add self-repair
+- Add advanced settings
+- Add log message filter

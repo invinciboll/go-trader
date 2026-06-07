@@ -14,15 +14,21 @@ export function AppHeader({ isDark, setDarkMode }: { isDark: boolean; setDarkMod
                 paddingRight: 150,
                 background: token.colorBgContainer,
                 borderBottom: `1px solid ${token.colorBorderSecondary}`,
+                justifyContent: "space-between"
             }}
         >
-            <Typography.Title level={4} style={{ margin: 0, color: token.colorText, flex: 1 }}>
-                Go Trader
-            </Typography.Title>
+            <Flex gap={16} align="center">
+                <Typography.Title level={4} style={{ margin: 0, color: token.colorText, flex: 1 }}>
+                    Go Trader
+                </Typography.Title>
+                <Typography.Text style={{fontSize: 8, fontFamily: "monospace"}}>
+                    build {__BUILD_NUMBER__}
+                </Typography.Text>
+            </Flex >
             <Flex align="center" gap={8}>
                 {isDark ? <SunOutlined style={{ color: token.colorText }} /> : <MoonFilled style={{ color: token.colorText }} />}
                 <Switch checked={isDark} onChange={setDarkMode} />
             </Flex>
-        </Header>
+        </Header >
     );
 }
